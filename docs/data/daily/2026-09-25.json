@@ -1,6 +1,6 @@
 {
  "trade_date": "2026-09-25",
- "generated_at": "2026-09-27T14:53:30+07:00",
+ "generated_at": "2026-09-27T14:59:16+07:00",
  "sources": {
   "kingstock": {
    "ok": true,
@@ -43,237 +43,237 @@
  "scores": {
   "ACB": {
    "pass": 1,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxoxxx"
+   "code": "x|xxx|xxxxxx|x|xxoxxx"
   },
   "AGR": {
    "pass": 0,
-   "total": 15,
+   "total": 16,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxx-"
+   "code": "x|xxx|xxxxxx|x|xxxxx-"
   },
   "BID": {
    "pass": 3,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xox|ooxxx|x|xxxxxx"
+   "code": "x|xox|ooxxxx|x|xxxxxx"
   },
   "CEO": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "CII": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "CTG": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "DCM": {
-   "pass": 13,
-   "total": 16,
+   "pass": 14,
+   "total": 17,
    "warn": 0,
-   "code": "x|ooo|oooxo|x|oooooo"
+   "code": "x|ooo|ooooxo|x|oooooo"
   },
   "DGC": {
    "pass": 2,
-   "total": 7,
+   "total": 8,
    "warn": 0,
-   "code": "x|xxx|oo---|x|------"
+   "code": "x|xxx|oo--x-|x|------"
   },
   "DPR": {
    "pass": 7,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|oox|xooxo|x|oxxoxx"
+   "code": "x|oox|xooxxo|x|oxxoxx"
   },
   "DXG": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "EIB": {
    "pass": 6,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxo|ooxxx|o|xxoxxo"
+   "code": "x|xxo|ooxxxx|o|xxoxxo"
   },
   "FPT": {
    "pass": 2,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "o|xox|xxxxx|x|xxxxxx"
+   "code": "o|xox|xxxxxx|x|xxxxxx"
   },
   "GAS": {
    "pass": 1,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xox|xxxxx|x|xxxxxx"
+   "code": "x|xox|xxxxxx|x|xxxxxx"
   },
   "GMD": {
-   "pass": 11,
-   "total": 16,
+   "pass": 12,
+   "total": 17,
    "warn": 0,
-   "code": "o|xoo|oxoxo|x|ooooox"
+   "code": "o|xoo|oxooxo|x|ooooox"
   },
   "GVR": {
    "pass": 4,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xoo|ooxxx|x|xxxxxx"
+   "code": "x|xoo|ooxxxx|x|xxxxxx"
   },
   "HCM": {
    "pass": 2,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|oox|xxxxx|x|xxxxxx"
+   "code": "x|oox|xxxxxx|x|xxxxxx"
   },
   "HPG": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "KBC": {
    "pass": 3,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxoxx|x|oxoxxx"
+   "code": "x|xxx|xxoxxx|x|oxoxxx"
   },
   "LPB": {
    "pass": 1,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|oxx|xxxxx|x|xxxxxx"
+   "code": "x|oxx|xxxxxx|x|xxxxxx"
   },
   "MBB": {
    "pass": 4,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|oooxx|x|oxxxxx"
+   "code": "x|xxx|oooxxx|x|oxxxxx"
   },
   "MBS": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "MSB": {
    "pass": 9,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xoo|xxoxo|x|ooxooo"
+   "code": "x|xoo|xxoxxo|x|ooxooo"
   },
   "PLX": {
    "pass": 2,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xox|xxxxx|x|xxoxxx"
+   "code": "x|xox|xxxxxx|x|xxoxxx"
   },
   "PVD": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "PVS": {
    "pass": 1,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xox|xxxxx|x|xxxxxx"
+   "code": "x|xox|xxxxxx|x|xxxxxx"
   },
   "SHB": {
    "pass": 4,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|ooxxx|x|xooxxx"
+   "code": "x|xxx|ooxxxx|x|xooxxx"
   },
   "SHS": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "SSI": {
    "pass": 1,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xox|xxxxx|x|xxxxxx"
+   "code": "x|xox|xxxxxx|x|xxxxxx"
   },
   "STB": {
    "pass": 3,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xox|xxoxx|x|oxxxxx"
+   "code": "x|xox|xxoxxx|x|oxxxxx"
   },
   "SZC": {
    "pass": 3,
-   "total": 15,
-   "warn": 0,
-   "code": "x|oox|oxxxx|x|xxxxx-"
-  },
-  "TCB": {
-   "pass": 10,
    "total": 16,
    "warn": 0,
-   "code": "x|xoo|oooxo|x|oxooxo"
+   "code": "x|oox|oxxxxx|x|xxxxx-"
+  },
+  "TCB": {
+   "pass": 11,
+   "total": 17,
+   "warn": 0,
+   "code": "x|xoo|ooooxo|x|oxooxo"
   },
   "TCH": {
    "pass": 3,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xox|oxxxx|x|xxoxxx"
+   "code": "x|xox|oxxxxx|x|xxoxxx"
   },
   "TPB": {
    "pass": 10,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "o|xxo|ooxxo|x|ooxooo"
+   "code": "o|xxo|ooxxxo|x|ooxooo"
   },
   "VCB": {
    "pass": 1,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xox|xxxxx|x|xxxxxx"
+   "code": "x|xox|xxxxxx|x|xxxxxx"
   },
   "VCI": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "VDS": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "VIB": {
    "pass": 4,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|oxoxx|x|oxxxox"
+   "code": "x|xxx|oxoxxx|x|oxxxox"
   },
   "VIX": {
    "pass": 0,
-   "total": 16,
+   "total": 17,
    "warn": 0,
-   "code": "x|xxx|xxxxx|x|xxxxxx"
+   "code": "x|xxx|xxxxxx|x|xxxxxx"
   },
   "VPB": {
-   "pass": 14,
-   "total": 16,
+   "pass": 15,
+   "total": 17,
    "warn": 0,
-   "code": "o|ooo|ooooo|x|ooxooo"
+   "code": "o|ooo|oooooo|x|ooxooo"
   }
  }
 }

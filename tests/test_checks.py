@@ -60,18 +60,22 @@ def pp_sym(price=10.5, buy=600, sell=300, c=10.5, pc=10.0, big=(200, 100), est=F
 def test_pricepath_all_pass():
     rows, poc = C.pricepath("A", {"symbols": {"A": pp_sym()}}, TD, None)
     assert poc == {"10": 9.55, "20": 9.85}                     # bins[poc][0] + bin/2
-    assert [r["s"] for r in rows] == ["ok", "ok", "ok", "ok", "ok"]
+    assert [r["s"] for r in rows] == ["ok", "ok", "ok", "ok", "ok", "ok"]
 
 
 def test_pricepath_fails():
     s = pp_sym(price=9.0, buy=300, sell=600, c=10.1, pc=10.0, big=(50, 90), closes=[10.5, 10.4, 10.3, 10.2, 10.1, 10.1])
     rows, _ = C.pricepath("A", {"symbols": {"A": s}}, TD, None)
-    assert [r["s"] for r in rows] == ["no", "no", "no", "no", "no"]
+    assert [r["s"] for r in rows] == ["no", "no", "no", "no", "no", "no"]
 
 
-def test_push_needs_both_flow_and_breakout():
+def test_push_and_up2_independent():
     rows, _ = C.pricepath("A", {"symbols": {"A": pp_sym(c=10.1, pc=10.0)}}, TD, None)   # mua đẩy nhưng chỉ +1 %
-    assert st(rows, "push") == "no" and "mua đẩy giá lên" in next(r for r in rows if r["id"] == "push")["d"]
+    assert st(rows, "push") == "ok" and st(rows, "up2") == "no"
+    rows, _ = C.pricepath("A", {"symbols": {"A": pp_sym(buy=300, sell=600, c=10.3, pc=10.0)}}, TD, None)  # +3 %, bán áp đảo
+    assert st(rows, "push") == "no" and st(rows, "up2") == "ok"
+    rows, _ = C.pricepath("A", {"symbols": {"A": pp_sym(no_side=True)}}, TD, None)
+    assert st(rows, "push") == "na" and st(rows, "up2") == "ok"             # tăng 2 % không cần chiều mua-bán
 
 
 def test_pricepath_missing():
@@ -156,9 +160,9 @@ def test_score_counts_only_ok_and_no():
                 of_latest=lat, of_daily=dy)
     b = C.score("A", S, TD, {})
     assert b["name"] == "Công ty A" and b["warn"] == 0
-    assert b["total"] == 1 + 1 + 5 + 1 + 6          # A:1 · B: cdl tính, st/ema na (A không có trong trend) · C:5 · D:1 · E:6
+    assert b["total"] == 1 + 1 + 6 + 1 + 6          # A:1 · B: cdl tính, st/ema na (A không có trong trend) · C:6 · D:1 · E:6
     assert b["na"] == 2
-    assert b["pass"] == 11 and C.code(b).count("|") == 4
+    assert b["pass"] == 12 and C.code(b).count("|") == 4
     assert b["chart"] is None                       # không có nến candle-radar → không vẽ
 
 

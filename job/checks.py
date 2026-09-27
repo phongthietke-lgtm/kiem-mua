@@ -1,4 +1,4 @@
-"""16 tiêu chí (A–E) cho một mã. Hàm thuần: nhận dữ liệu thô của Sources, trả dòng {id, s, t, d[, links]}.
+"""17 tiêu chí (A–E) cho một mã. Hàm thuần: nhận dữ liệu thô của Sources, trả dòng {id, s, t, d[, links]}.
 Nhóm A là tin UBCKNN (cổ tức / tăng vốn), thay tin của app information theo yêu cầu 26/09/2026.
 
 Trạng thái `s`: ok (đạt) · no (chưa đạt) · warn (cảnh báo đỏ, không tính điểm) · na (thiếu dữ liệu, không tính)
@@ -12,6 +12,7 @@ Luật lấy đúng như app gốc (đã soát 26/09/2026):
   Spring #2          bỏ hẳn, không chấm, không vẽ (người dùng chốt 26/09)
   Cá mập             "mua > bán" thay cho "> 50 % KL ngày" (ngưỡng cũ 0/39 mã đạt phiên 25/09; chốt 26/09)
   Cá mập 5 phiên     order-flow daily bb > bs (ô "Delta cá mập") ít nhất 3/5 phiên gần nhất (thêm 27/09)
+  Đẩy giá / tăng 2 % tách thành 2 dòng "Mua đẩy giá lên" và "Giá tăng > 2%" (27/09)
   Giá vốn cá mập     order-flow/docs/app.js:485 drawWhale → AVWAP lệnh cá mập mua từ blv, tối đa 20 phiên (thêm 27/09)
 """
 from __future__ import annotations
@@ -110,7 +111,7 @@ def candle(sym: str, latest: dict | None, days: dict, stale: str | None) -> list
 def pricepath(sym: str, pp: dict | None, trade_date: str, stale: str | None) -> tuple[list[dict], dict]:
     """Trả (các dòng, {"10": POC10, "20": POC20}) — POC dùng lại cho biểu đồ."""
     ids = [("poc10", "Giá trên POC 10 phiên"), ("poc20", "Giá trên POC 20 phiên"), ("whale", "Cá mập mua > cá mập bán"),
-           ("push", "Mua đẩy giá lên & tăng > 2%"), ("pp_cvd", "Giá & CVD cùng lên 5 phiên")]
+           ("push", "Mua đẩy giá lên"), ("up2", "Giá tăng > 2%"), ("pp_cvd", "Giá & CVD cùng lên 5 phiên")]
     s = (pp or {}).get("symbols", {}).get(sym)
     why = stale or (None if s else "Chưa đọc được price-path" if pp is None else "Mã không có trong price-path")
     if not why and s.get("price_date") != trade_date:
@@ -142,13 +143,18 @@ def pricepath(sym: str, pp: dict | None, trade_date: str, stale: str | None) -> 
     else:
         flow = (d["buy"] - d["sell"]) / (d["buy"] + d["sell"])
         chg = d["c"] / d["pc"] - 1
-        pushing = flow >= FLOW_T and chg > PX_FLAT
-        state = "mua đẩy giá lên" if pushing else "không phải mua đẩy"
-        out.append(R("push", OK if pushing and chg > BREAKOUT else NO, ids[3][1],
-                     f"Dòng chủ động {pct(flow)} ({state}) · giá {pct(chg)}"))
+        out.append(R("push", OK if flow >= FLOW_T and chg > PX_FLAT else NO, ids[3][1],
+                     f"Dòng chủ động {pct(flow)} · giá {pct(chg)}"))
+
+    if not d.get("pc"):                     # không cần chiều mua-bán, chỉ cần giá tham chiếu
+        out.append(R("up2", NA, ids[4][1], "Thiếu giá tham chiếu"))
+    else:
+        chg = d["c"] / d["pc"] - 1
+        out.append(R("up2", OK if chg > BREAKOUT else NO, ids[4][1],
+                     f"Giá {pct(chg)} (đóng {f2(d['c'])} / tham chiếu {f2(d['pc'])})"))
 
     if s["daily"][-1].get("no_side"):
-        out.append(R("pp_cvd", NA, ids[4][1], "Không có chiều mua-bán"))
+        out.append(R("pp_cvd", NA, ids[5][1], "Không có chiều mua-bán"))
     else:
         acc, cvd = 0, []
         for x in s["daily"]:
@@ -156,7 +162,7 @@ def pricepath(sym: str, pp: dict | None, trade_date: str, stale: str | None) -> 
             cvd.append(acc)
         cv, px = cvd[-(WINDOW + 1):], [x["c"] for x in s["daily"][-(WINDOW + 1):]]
         up_c, up_p = rising(cv), rising(px)
-        out.append(R("pp_cvd", OK if up_c and up_p else NO, ids[4][1],
+        out.append(R("pp_cvd", OK if up_c and up_p else NO, ids[5][1],
                      f"Giá {arrow(up_p)} {pct(px[-1] / px[0] - 1)} · CVD {arrow(up_c)} {vol(cv[-1] - cv[0])} cp"))
     return out, pocs
 
