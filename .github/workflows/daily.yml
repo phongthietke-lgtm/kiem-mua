@@ -1,0 +1,65 @@
+# Job sau phiên. 09:30 UTC = 16:30 VN — sau order-flow (16:00), price-path zone (15:50), wyckoff (15:45),
+# candle-radar (15:35). Dự phòng 17:15 và 18:45 VN: nguồn nào chưa có phiên hôm nay thì lần 16:30/17:15 thoát
+# để chờ; lần 18:45 chấm luôn (nguồn cũ = "thiếu dữ liệu"). Job idempotent: có daily/<hôm nay>.json rồi thì thoát.
+# Job luôn thoát mã 0 — mã ≠ 0 làm bước commit bị bỏ qua (bẫy price-path 23/09/2026).
+name: daily
+
+on:
+  schedule:
+    - cron: "30 9 * * 1-5"
+    - cron: "15 10 * * 1-5"
+    - cron: "45 11 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Chạy lại dù hôm nay đã có file / nguồn chưa đủ"
+        default: "false"
+      test_push:
+        description: "Gửi một thông báo thử tới mọi máy đã đăng ký"
+        default: "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+      VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+      VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+      PUSH_SUBS_FALLBACK: ${{ secrets.PUSH_SUBS_FALLBACK }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Thông báo thử
+        if: ${{ github.event.inputs.test_push == 'true' }}
+        run: python -m job.push --test
+
+      - name: Chấm 13 tiêu chí + push
+        run: |
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then FORCE=--force; else FORCE=; fi
+          python -m job.run_daily $FORCE
+
+      - name: Commit kết quả
+        if: always()
+        run: |
+          git config user.name "kiem-mua-bot"
+          git config user.email "kiem-mua-bot@users.noreply.github.com"
+          git add docs/data/
+          if git diff --cached --quiet; then echo "không có gì mới"; exit 0; fi
+          git commit -m "daily: $(date -u +%Y-%m-%d) [skip ci]"
+          git pull --rebase
+          git push

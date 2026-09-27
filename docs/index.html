@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#3B1A78">
+  <title>Kiểm Mua</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="styles.css?v=4">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-today" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="#3B1A78"/><circle cx="15" cy="12" r="2" fill="#3B1A78"/><circle cx="8" cy="18" r="2" fill="#3B1A78"/></symbol>
+    <!-- Logo "Kính lúp" (chọn 27/09/2026): vòng kính trắng, dấu tích xanh chanh, cán vàng. Toạ độ khớp icons/logo.svg -->
+    <symbol id="logo" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="#3B1A78"/><line x1="75" y1="75" x2="95" y2="95" stroke="#F6C12E" stroke-width="14" stroke-linecap="round"/><circle cx="54" cy="54" r="28" stroke="#FFFFFF" stroke-width="11" fill="#3B1A78"/><path d="M41 55 L51 65 L68 45" stroke="#7DBA2F" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="g-A" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></symbol>
+    <symbol id="g-B" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 18l5-6 4 3 7-9"/><path d="M15 6h5v5"/></symbol>
+    <symbol id="g-C" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M9 20V4M14 20v-7M19 20V8"/></symbol>
+    <symbol id="g-D" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="#fff"/></symbol>
+    <symbol id="g-E" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+  </defs>
+</svg>
+
+<main id="main">
+  <!-- ============ HÔM NAY ============ -->
+  <section class="panel on" id="p-today" aria-label="Hôm nay">
+    <div class="head">
+      <div class="row"><div class="kicker">Soát sau phiên · 16:30</div><div class="kicker mono" id="kDate"></div></div>
+      <div class="brand"><svg aria-hidden="true"><use href="#logo"/></svg><h1 class="title">KIỂM <span class="plus">+</span> MUA</h1></div>
+      <div class="pill">Theo <em>tín hiệu</em>. Soát bằng <em>5 nguồn</em>.</div>
+    </div>
+    <div class="src" id="src"></div>
+    <div id="alerts"><div class="empty"><b>Đang tải…</b></div></div>
+  </section>
+
+  <!-- ============ TRA MÃ ============ -->
+  <section class="panel" id="p-lookup" aria-label="Tra mã">
+    <div class="head">
+      <div class="kicker">Danh mục KingStock</div>
+      <h2 class="title small">TRA MÃ</h2>
+      <div class="pill">Nhập mã, <em>xem ngay</em> 14 tiêu chí.</div>
+    </div>
+    <form class="search" id="f">
+      <input id="q" maxlength="4" autocomplete="off" placeholder="Ví dụ: HPG" aria-label="Mã cổ phiếu">
+      <button type="submit">Kiểm</button>
+    </form>
+    <div class="msg" id="msg" hidden></div>
+    <div class="recent" id="recent"></div>
+    <div class="bos"><div class="ln"></div><div class="lab"><b>Cả danh mục</b><span id="gridNote"></span></div></div>
+    <div class="grid39" id="grid39"></div>
+  </section>
+
+  <!-- ============ LỊCH SỬ ============ -->
+  <section class="panel" id="p-history" aria-label="Lịch sử">
+    <div class="head">
+      <div class="kicker">30 phiên gần nhất</div>
+      <h2 class="title small">LỊCH SỬ</h2>
+      <div class="pill">Máy đã <em>thật sự</em> chấm gì.</div>
+    </div>
+    <div id="hist"></div>
+  </section>
+
+  <!-- ============ CÀI ĐẶT ============ -->
+  <section class="panel" id="p-settings" aria-label="Cài đặt">
+    <div class="head">
+      <div class="kicker">Thông báo · tiêu chí</div>
+      <h2 class="title small">CÀI ĐẶT</h2>
+      <div class="pill">Biết rõ <em>từng tiêu chí</em> đo gì.</div>
+    </div>
+    <div class="box">
+      <h3>Thông báo trên máy này</h3>
+      <div class="state" id="pushState">Đang kiểm tra…</div>
+      <button class="btn" type="button" id="pushBtn">Bật thông báo</button>
+      <div id="subCodeWrap"></div>
+      <p>Job chạy 16:30 thứ Hai đến thứ Sáu (chạy lại 17:15 và 18:45 nếu app nguồn chưa xong). Có mã KingStock báo MUA thì gửi một thông báo tổng kết.</p>
+    </div>
+    <div class="box"><h3>14 tiêu chí</h3><div class="crit" id="crit"></div></div>
+    <p class="disc">Kiểm Mua chỉ liệt kê những gì 5 app thấy. Nó không phải khuyến nghị mua. Các lần đo trước cho thấy chưa tiêu chí riêng lẻ nào hơn mua đại.</p>
+    <div class="meta" id="meta"></div>
+  </section>
+</main>
+
+<nav role="tablist" aria-label="Điều hướng">
+  <button role="tab" aria-selected="true" data-tab="today"><svg aria-hidden="true"><use href="#i-today"/></svg><span>Hôm nay</span></button>
+  <button role="tab" aria-selected="false" data-tab="lookup"><svg aria-hidden="true"><use href="#i-search"/></svg><span>Tra mã</span></button>
+  <button role="tab" aria-selected="false" data-tab="history"><svg aria-hidden="true"><use href="#i-history"/></svg><span>Lịch sử</span></button>
+  <button role="tab" aria-selected="false" data-tab="settings"><svg aria-hidden="true"><use href="#i-settings"/></svg><span>Cài đặt</span></button>
+</nav>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Chi tiết mã"><div class="in" id="sheetIn"></div></div>
+<div class="toast" id="toast"><b id="toastTitle"></b><span id="toastBody"></span></div>
+
+<script src="config.js?v=1"></script>
+<script src="app.js?v=5"></script>
+</body>
+</html>

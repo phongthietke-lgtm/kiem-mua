@@ -1,0 +1,16 @@
+{
+  "name": "Kiểm Mua",
+  "short_name": "Kiểm Mua",
+  "description": "Soát mã KingStock báo MUA qua 5 app: tin tức, nến, vùng giá, Wyckoff, order flow — sau phiên.",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#3B1A78",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
