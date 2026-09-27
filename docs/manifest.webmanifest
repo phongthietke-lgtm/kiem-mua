@@ -3,6 +3,7 @@
   "short_name": "Kiểm Mua",
   "description": "Soát mã KingStock báo MUA qua 5 app: tin tức, nến, vùng giá, Wyckoff, order flow — sau phiên.",
   "lang": "vi",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

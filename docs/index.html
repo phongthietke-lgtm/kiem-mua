@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -38,6 +38,7 @@
       <div class="brand"><svg aria-hidden="true"><use href="#logo"/></svg><h1 class="title">KIỂM <span class="plus">+</span> MUA</h1></div>
       <div class="pill">Theo <em>tín hiệu</em>. Soát bằng <em>5 nguồn</em>.</div>
     </div>
+    <button class="install" type="button" id="installTop" hidden>⬇ Cài app xuống điện thoại</button>
     <div class="src" id="src"></div>
     <div id="alerts"><div class="empty"><b>Đang tải…</b></div></div>
   </section>
@@ -76,6 +77,11 @@
       <h2 class="title small">CÀI ĐẶT</h2>
       <div class="pill">Biết rõ <em>từng tiêu chí</em> đo gì.</div>
     </div>
+    <div class="box" id="installBox">
+      <h3>Cài app xuống điện thoại</h3>
+      <div class="state" id="installState">Đang kiểm tra…</div>
+      <button class="btn" type="button" id="installBtn" hidden>Cài app</button>
+    </div>
     <div class="box">
       <h3>Thông báo trên máy này</h3>
       <div class="state" id="pushState">Đang kiểm tra…</div>
@@ -100,6 +106,6 @@
 <div class="toast" id="toast"><b id="toastTitle"></b><span id="toastBody"></span></div>
 
 <script src="config.js?v=1"></script>
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

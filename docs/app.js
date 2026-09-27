@@ -226,7 +226,7 @@
 
   // ---------------------------------------------------------------- push (chép wyckoff-radar, chỉ nhánh không Worker)
   const b64ToU8 = (s) => { const p = "=".repeat((4 - s.length % 4) % 4); const b = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(b, (c) => c.charCodeAt(0)); };
-  const SW = "sw.js?v=1";
+  const SW = "sw.js?v=2";   // đổi số khi cần máy cũ đăng ký lại service worker
   let toastTimer = null;
   function toast(t, b) { $("#toastTitle").textContent = t; $("#toastBody").textContent = b || ""; $("#toast").classList.add("on"); clearTimeout(toastTimer); toastTimer = setTimeout(() => $("#toast").classList.remove("on"), 3500); }
   async function pushStatus() {
@@ -266,6 +266,34 @@
       st.textContent = "Không đăng ký được: " + (err && err.message ? err.message : err) + " — chụp màn hình dòng này gửi lại.";
     } finally { btn.disabled = false; }
   });
+
+  // ---------------------------------------------------------------- cài app (27/09/2026)
+  // Chrome/Android bắn beforeinstallprompt khi trang đủ điều kiện cài → giữ lại, hiện nút, bấm thì mở hộp cài thật.
+  // Máy từng mở trang lúc Pages còn 404 thì menu Chrome chỉ còn "Thêm lối tắt"; nút này tránh phải mò menu.
+  let deferred = null;
+  const installed = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  function installUi() {
+    const st = $("#installState");
+    if (installed()) { $("#installTop").hidden = true; $("#installBtn").hidden = true; st.textContent = "Đã cài: anh đang mở Kiểm Mua như một app."; return; }
+    $("#installTop").hidden = !deferred; $("#installBtn").hidden = !deferred;
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    st.innerHTML = deferred ? "Bấm nút bên dưới, rồi chọn <b>Cài đặt</b>."
+      : ios ? "Trên iPhone: mở bằng Safari → nút <b>Chia sẻ</b> → <b>Thêm vào MH chính</b>."
+      : "Chưa thấy nút cài? Mở bằng <b>Chrome</b>, tải lại trang một lần, đợi vài giây. Hoặc bấm <b>⋮</b> → <b>Cài đặt ứng dụng</b> (hoặc <b>Thêm vào màn hình chính</b>). Đã lỡ tạo lối tắt thì xoá lối tắt đó trước.";
+  }
+  addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferred = e; installUi(); });
+  addEventListener("appinstalled", () => { deferred = null; installUi(); toast("Đã cài Kiểm Mua", "Mở từ icon kính lúp trên màn hình chính."); });
+  async function doInstall() {
+    if (!deferred) return installUi();
+    deferred.prompt();
+    const r = await deferred.userChoice.catch(() => null);
+    deferred = null;
+    if (r && r.outcome !== "accepted") toast("Chưa cài", "Bấm lại nút Cài app khi anh muốn.");
+    installUi();
+  }
+  $("#installTop").addEventListener("click", doInstall);
+  $("#installBtn").addEventListener("click", doInstall);
+  installUi();
 
   // ---------------------------------------------------------------- tải dữ liệu
   if ("serviceWorker" in navigator) navigator.serviceWorker.register(SW).catch(() => {});
