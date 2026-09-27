@@ -96,6 +96,7 @@
       ["E", "CVD dương", "CVD cộng dồn nhiều phiên của order-flow."],
       ["E", "Giá trên VWAP", "VWAP khớp liên tục, không tính ATO/ATC."],
       ["E", "CVD & giá cùng lên", "Cùng tăng so với 5 phiên trước (cần ít nhất 3 phiên dữ liệu)."],
+      ["E", "Cá mập mua > bán ≥ 3/5 phiên", "Trong 5 phiên gần nhất, ít nhất 3 phiên có lệnh cá mập (từ 500 triệu đồng) mua chủ động nhiều hơn bán chủ động. Số lấy từ ô Delta cá mập của order-flow."],
     ];
     $("#crit").innerHTML = L.map(([g, t, d]) => `<span class="L" style="background:${G[g][2]}">${g}</span><span><b>${t}</b><br>${d}</span>`).join("");
     $("#meta").innerHTML = `Dữ liệu phiên ${dm(D.trade_date)} · chấm lúc ${(D.generated_at || "").slice(11, 16)} · ${Object.keys(D.board).length} mã<br>` +

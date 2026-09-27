@@ -1,4 +1,4 @@
-"""13 tiêu chí (A–E) cho một mã. Hàm thuần: nhận dữ liệu thô của Sources, trả dòng {id, s, t, d[, links]}.
+"""15 tiêu chí (A–E) cho một mã. Hàm thuần: nhận dữ liệu thô của Sources, trả dòng {id, s, t, d[, links]}.
 Nhóm A là tin UBCKNN (cổ tức / tăng vốn), thay tin của app information theo yêu cầu 26/09/2026.
 
 Trạng thái `s`: ok (đạt) · no (chưa đạt) · warn (cảnh báo đỏ, không tính điểm) · na (thiếu dữ liệu, không tính)
@@ -11,6 +11,7 @@ Luật lấy đúng như app gốc (đã soát 26/09/2026):
   cá mập             lệnh gộp ≥ 500 triệu đồng (price-path/zone/collect.py, order-flow/flow/ticks.py)
   Spring #2          bỏ hẳn, không chấm, không vẽ (người dùng chốt 26/09)
   Cá mập             "mua > bán" thay cho "> 50 % KL ngày" (ngưỡng cũ 0/39 mã đạt phiên 25/09; chốt 26/09)
+  Cá mập 5 phiên     order-flow daily bb > bs (ô "Delta cá mập") ít nhất 3/5 phiên gần nhất (thêm 27/09)
 """
 from __future__ import annotations
 
@@ -26,6 +27,7 @@ WY_LOOKBACK = 20
 WY_GOOD = {"sc": "SC", "spring3": "Spring #3", "test": "Test sau Spring"}
 CHART_N = 46
 POC_WINDOWS = ("10", "20")
+WHALE_N, WHALE_MIN = 5, 3           # cá mập mua ròng ít nhất 3 trong 5 phiên (yêu cầu 27/09)
 SSC_DAYS = 30                       # hồ sơ phát hành còn "nóng" tới ngày chốt quyền, thường vài tuần
 
 GROUPS = {"A": "Tin UBCKNN", "B": "Nến & xu hướng", "C": "Vùng giá & dòng tiền", "D": "Wyckoff", "E": "Order flow"}
@@ -179,7 +181,8 @@ def wyckoff(sym: str, wy_bars: dict | None, wy_latest: dict | None, stale: str |
 # ---------------------------------------------------------------- E. order-flow
 def orderflow(sym: str, of_latest: dict | None, of_daily: dict, trade_date: str, stale: str | None) -> list[dict]:
     ids = [("delta", "Delta dương · mua CĐ > bán CĐ"), ("cvd", "CVD dương"),
-           ("vwap", "Giá trên VWAP"), ("of_cvd", "CVD & giá cùng lên 5 phiên")]
+           ("vwap", "Giá trên VWAP"), ("of_cvd", "CVD & giá cùng lên 5 phiên"),
+           ("whale5", f"Cá mập mua > bán ≥ {WHALE_MIN}/{WHALE_N} phiên")]
     it = next((x for x in (of_latest or {}).get("items") or [] if x.get("sym") == sym), None)
     dy = (of_daily.get(sym) or {}).get("days") or []
     why = stale or (None if it else "Chưa đọc được order-flow" if of_latest is None else "Mã không có trong order-flow")
@@ -205,6 +208,14 @@ def orderflow(sym: str, of_latest: dict | None, of_daily: dict, trade_date: str,
     else:
         out.append(R("of_cvd", OK if up_c and up_p else NO, ids[3][1],
                      f"Giá {arrow(up_p)} · CVD {arrow(up_c)} ({len(cv) - 1} phiên)"))
+    wd = dy[-WHALE_N:]
+    if len(wd) < WHALE_N:
+        out.append(R("whale5", NA, ids[4][1], f"order-flow mới có {len(dy)} phiên"))
+    else:
+        n = sum((x.get("bb") or 0) > (x.get("bs") or 0) for x in wd)
+        out.append(R("whale5", OK if n >= WHALE_MIN else NO, ids[4][1],
+                     f"{n}/{WHALE_N} phiên mua ròng · " +
+                     " · ".join(f"{dm(x['d'])} {vol((x.get('bb') or 0) - (x.get('bs') or 0))}" for x in wd)))
     return out
 
 

@@ -99,21 +99,34 @@ def test_wyckoff():
 
 
 # ---------------------------------------------------------------- E
-def of_data(delta=500, cvd=(1, 2, 3, 4, 5, 6), close=(10, 10.1, 10.2, 10.3, 10.4, 10.5), cvw=0.4, day=TD):
+def of_data(delta=500, cvd=(1, 2, 3, 4, 5, 6), close=(10, 10.1, 10.2, 10.3, 10.4, 10.5), cvw=0.4, day=TD,
+            big=(1, 1, 1, 1, 1, 1)):
     it = {"sym": "A", "day": day, "close": close[-1], "chg": 1.0, "buy": 1000 + delta, "sell": 1000, "delta": delta,
           "share": 55.0, "no_side": False}
-    days = [{"d": f"2026-09-{20 + i}" if i < len(cvd) - 1 else TD, "cvd": c, "close": p, "vw": 10.3, "cvw": cvw}
-            for i, (c, p) in enumerate(zip(cvd, close))]
+    days = [{"d": f"2026-09-{20 + i}" if i < len(cvd) - 1 else TD, "cvd": c, "close": p, "vw": 10.3, "cvw": cvw,
+             "bb": 1000 if b > 0 else 0, "bs": 1000 if b < 0 else 0}
+            for i, (c, p, b) in enumerate(zip(cvd, close, big))]
     return {"items": [it]}, {"A": {"days": days}}
 
 
 def test_orderflow():
     lat, dy = of_data()
-    assert [r["s"] for r in C.orderflow("A", lat, dy, TD, None)] == ["ok", "ok", "ok", "ok"]
-    lat, dy = of_data(delta=-5, cvd=(6, 5, 4, 3, 2, -1), close=(11, 10.9, 10.8, 10.7, 10.6, 10.5), cvw=-0.2)
-    assert [r["s"] for r in C.orderflow("A", lat, dy, TD, None)] == ["no", "no", "no", "no"]
+    assert [r["s"] for r in C.orderflow("A", lat, dy, TD, None)] == ["ok", "ok", "ok", "ok", "ok"]
+    lat, dy = of_data(delta=-5, cvd=(6, 5, 4, 3, 2, -1), close=(11, 10.9, 10.8, 10.7, 10.6, 10.5), cvw=-0.2,
+                      big=(-1, -1, -1, -1, -1, -1))
+    assert [r["s"] for r in C.orderflow("A", lat, dy, TD, None)] == ["no", "no", "no", "no", "no"]
     lat, dy = of_data(cvd=(1, 2), close=(10, 10.1))
     assert st(C.orderflow("A", lat, dy, TD, None), "of_cvd") == "na"      # mới 2 phiên
+    assert st(C.orderflow("A", lat, dy, TD, None), "whale5") == "na"
+
+
+def test_whale5_counts_last_5_sessions():
+    lat, dy = of_data(big=(1, -1, 1, -1, 1, 1))          # phiên đầu nằm ngoài 5 phiên → 3/5
+    assert st(C.orderflow("A", lat, dy, TD, None), "whale5") == "ok"
+    lat, dy = of_data(big=(1, 1, 1, -1, -1, 0))          # 2/5, phiên bằng nhau không tính mua ròng
+    assert st(C.orderflow("A", lat, dy, TD, None), "whale5") == "no"
+    lat, dy = of_data(cvd=(1, 2, 3, 4), close=(10, 10.1, 10.2, 10.3), big=(1, 1, 1, 1))
+    assert st(C.orderflow("A", lat, dy, TD, None), "whale5") == "na"      # mới 4 phiên
     lat, dy = of_data(day="2026-09-24")
     assert {r["s"] for r in C.orderflow("A", lat, dy, TD, None)} == {"na"}
 
@@ -126,9 +139,9 @@ def test_score_counts_only_ok_and_no():
                 of_latest=lat, of_daily=dy)
     b = C.score("A", S, TD, {})
     assert b["name"] == "Công ty A" and b["warn"] == 0
-    assert b["total"] == 1 + 1 + 5 + 1 + 4          # A:1 · B: cdl tính, st/ema na (A không có trong trend) · C:5 · D:1 · E:4
+    assert b["total"] == 1 + 1 + 5 + 1 + 5          # A:1 · B: cdl tính, st/ema na (A không có trong trend) · C:5 · D:1 · E:5
     assert b["na"] == 2
-    assert b["pass"] == 9 and C.code(b).count("|") == 4
+    assert b["pass"] == 10 and C.code(b).count("|") == 4
     assert b["chart"] is None                       # không có nến candle-radar → không vẽ
 
 
