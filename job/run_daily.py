@@ -1,7 +1,7 @@
 """Job sau phiên — GitHub Actions 16:30 T2–T6 (dự phòng 17:15, 18:45).
 Local: python -m job.run_daily [--force] [--no-push] [--dry-run] [--date YYYY-MM-DD]
 
-Luồng: tải các nguồn (KingStock + tin UBCKNN, 4 app cuối ngày) (job/sources.py) → kiểm nguồn đã có phiên hôm nay chưa → chấm 15 tiêu chí cho cả danh mục
+Luồng: tải các nguồn (KingStock + tin UBCKNN, 4 app cuối ngày) (job/sources.py) → kiểm nguồn đã có phiên hôm nay chưa → chấm 16 tiêu chí cho cả danh mục
 (job/checks.py) → lọc mã KingStock báo MUA hôm nay → ghi docs/data/latest.json, daily/<ngày>.json, state.json
 → một push tổng kết nếu có mã báo mua.
 

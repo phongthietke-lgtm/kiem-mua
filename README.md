@@ -15,7 +15,7 @@ Volume Profile Lab 0/9, Spring/Test ≈ mua đại. Điểm mỗi ngày được
 Job làm lần lượt:
 1. `job/sources.py` tải các nguồn.
 2. Kiểm xem 4 app cuối ngày đã có phiên hôm nay chưa.
-3. `job/checks.py` chấm 15 tiêu chí cho cả danh mục (39 mã).
+3. `job/checks.py` chấm 16 tiêu chí cho cả danh mục (39 mã).
 4. Lọc các mã KingStock báo MUA hôm nay: `direction=buy`, chưa `invalidated`, mỗi mã lấy lần báo sớm nhất.
 5. Ghi `docs/data/latest.json` (gồm cả biểu đồ 46 phiên), `daily/<ngày>.json` (điểm + chuỗi trạng thái) và `state.json`.
 6. Gửi một thông báo tổng kết nếu có mã báo MUA.
@@ -32,12 +32,13 @@ Job làm lần lượt:
 | wyckoff-radar | `bars.json` (`marks` ≈ 6 tháng) và `latest.json` (`board`) |
 | order-flow | `latest.json` (`items[]`) và `daily/<mã>.json` (39 tệp) |
 
-## 15 tiêu chí (`job/checks.py`)
+## 16 tiêu chí (`job/checks.py`)
 Luật lấy đúng như app gốc, xem docstring đầu tệp. Có mấy chỗ chủ ý khác yêu cầu ban đầu, đều đã được anh chốt ngày 26/09:
 - **Cá mập:** tiêu chí là "cá mập mua > cá mập bán", thay cho "> 50 % KL ngày". Với ngưỡng cũ, phiên 25/09 không mã nào đạt (0/39). Tỷ lệ % KL ngày vẫn hiện để tham khảo.
 - **Spring #2:** bỏ hẳn, không chấm, không vẽ lên biểu đồ. Nhóm D chỉ xét SC, Spring #3 và Test trong 20 phiên.
 - **POC:** tách thành 2 dòng, "Giá trên POC 10 phiên" và "Giá trên POC 20 phiên", mỗi dòng một điểm. Không dùng POC 40 phiên nữa.
 - **Cá mập 5 phiên (thêm 27/09):** đếm trong 5 phiên gần nhất số phiên cá mập mua chủ động > bán chủ động (`bb > bs` trong `daily/<mã>.json` của order-flow, chính là ô "Delta cá mập"), đạt khi từ 3 phiên. Chưa đủ 5 phiên thì ghi thiếu dữ liệu. Dòng cá mập 1 phiên ở nhóm C vẫn giữ.
+- **Giá vốn cá mập (thêm 27/09):** đạt khi giá đóng cửa > giá mua bình quân của lệnh cá mập, cộng dồn `blv` tối đa 20 phiên (bỏ phiên `blv_ok=false`) — đúng đường vàng "Giá vốn CM" của order-flow (`drawWhale`). Chưa có lệnh cá mập mua thì ghi thiếu dữ liệu.
 - **Delta và mua/bán chủ động:** "delta dương" và "mua chủ động > bán chủ động" là cùng một phép so sánh (delta = mua − bán), nên gộp thành một dòng để không bị tính điểm hai lần.
 
 EMA10 và Supertrend của biểu đồ dùng `job/trend.py`, chép nguyên từ `candle-radar/job/trend.py`. Nếu sửa thì phải sửa ở cả hai nơi.

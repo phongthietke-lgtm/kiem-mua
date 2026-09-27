@@ -1,4 +1,4 @@
-"""15 tiêu chí (A–E) cho một mã. Hàm thuần: nhận dữ liệu thô của Sources, trả dòng {id, s, t, d[, links]}.
+"""16 tiêu chí (A–E) cho một mã. Hàm thuần: nhận dữ liệu thô của Sources, trả dòng {id, s, t, d[, links]}.
 Nhóm A là tin UBCKNN (cổ tức / tăng vốn), thay tin của app information theo yêu cầu 26/09/2026.
 
 Trạng thái `s`: ok (đạt) · no (chưa đạt) · warn (cảnh báo đỏ, không tính điểm) · na (thiếu dữ liệu, không tính)
@@ -12,6 +12,7 @@ Luật lấy đúng như app gốc (đã soát 26/09/2026):
   Spring #2          bỏ hẳn, không chấm, không vẽ (người dùng chốt 26/09)
   Cá mập             "mua > bán" thay cho "> 50 % KL ngày" (ngưỡng cũ 0/39 mã đạt phiên 25/09; chốt 26/09)
   Cá mập 5 phiên     order-flow daily bb > bs (ô "Delta cá mập") ít nhất 3/5 phiên gần nhất (thêm 27/09)
+  Giá vốn cá mập     order-flow/docs/app.js:485 drawWhale → AVWAP lệnh cá mập mua từ blv, tối đa 20 phiên (thêm 27/09)
 """
 from __future__ import annotations
 
@@ -28,6 +29,7 @@ WY_GOOD = {"sc": "SC", "spring3": "Spring #3", "test": "Test sau Spring"}
 CHART_N = 46
 POC_WINDOWS = ("10", "20")
 WHALE_N, WHALE_MIN = 5, 3           # cá mập mua ròng ít nhất 3 trong 5 phiên (yêu cầu 27/09)
+WHALE_COST_N = 20                   # khung "Giá vốn CM" của order-flow (Ds = days.slice(-20))
 SSC_DAYS = 30                       # hồ sơ phát hành còn "nóng" tới ngày chốt quyền, thường vài tuần
 
 GROUPS = {"A": "Tin UBCKNN", "B": "Nến & xu hướng", "C": "Vùng giá & dòng tiền", "D": "Wyckoff", "E": "Order flow"}
@@ -182,7 +184,7 @@ def wyckoff(sym: str, wy_bars: dict | None, wy_latest: dict | None, stale: str |
 def orderflow(sym: str, of_latest: dict | None, of_daily: dict, trade_date: str, stale: str | None) -> list[dict]:
     ids = [("delta", "Delta dương · mua CĐ > bán CĐ"), ("cvd", "CVD dương"),
            ("vwap", "Giá trên VWAP"), ("of_cvd", "CVD & giá cùng lên 5 phiên"),
-           ("whale5", f"Cá mập mua > bán ≥ {WHALE_MIN}/{WHALE_N} phiên")]
+           ("whale5", f"Cá mập mua > bán ≥ {WHALE_MIN}/{WHALE_N} phiên"), ("whale_cost", "Giá trên giá vốn cá mập")]
     it = next((x for x in (of_latest or {}).get("items") or [] if x.get("sym") == sym), None)
     dy = (of_daily.get(sym) or {}).get("days") or []
     why = stale or (None if it else "Chưa đọc được order-flow" if of_latest is None else "Mã không có trong order-flow")
@@ -216,6 +218,19 @@ def orderflow(sym: str, of_latest: dict | None, of_daily: dict, trade_date: str,
         out.append(R("whale5", OK if n >= WHALE_MIN else NO, ids[4][1],
                      f"{n}/{WHALE_N} phiên mua ròng · " +
                      " · ".join(f"{dm(x['d'])} {vol((x.get('bb') or 0) - (x.get('bs') or 0))}" for x in wd)))
+    # blv = [[giá, bán_lớn, mua_lớn]] đã quy giá điều chỉnh, cùng hệ với close; phiên blv_ok=False chưa lưu theo mức giá
+    cw = dy[-WHALE_COST_N:]
+    pv = v = 0
+    for x in cw:
+        if x.get("blv_ok") is not False:
+            for p, _, b in x.get("blv") or []:
+                pv, v = pv + p * b, v + b
+    if not v:
+        out.append(R("whale_cost", NA, ids[5][1], "Chưa có lệnh cá mập mua"))
+    else:
+        av = pv / v
+        out.append(R("whale_cost", OK if last["close"] > av else NO, ids[5][1],
+                     f"Đóng {f2(last['close'])} · giá vốn CM {len(cw)} phiên {f2(av)} ({pct(last['close'] / av - 1)})"))
     return out
 
 

@@ -100,21 +100,22 @@ def test_wyckoff():
 
 # ---------------------------------------------------------------- E
 def of_data(delta=500, cvd=(1, 2, 3, 4, 5, 6), close=(10, 10.1, 10.2, 10.3, 10.4, 10.5), cvw=0.4, day=TD,
-            big=(1, 1, 1, 1, 1, 1)):
+            big=(1, 1, 1, 1, 1, 1), cost=10.0):
     it = {"sym": "A", "day": day, "close": close[-1], "chg": 1.0, "buy": 1000 + delta, "sell": 1000, "delta": delta,
           "share": 55.0, "no_side": False}
     days = [{"d": f"2026-09-{20 + i}" if i < len(cvd) - 1 else TD, "cvd": c, "close": p, "vw": 10.3, "cvw": cvw,
-             "bb": 1000 if b > 0 else 0, "bs": 1000 if b < 0 else 0}
+             "bb": 1000 if b > 0 else 0, "bs": 1000 if b < 0 else 0,
+             "blv": [] if cost is None else [[cost, 0, 1000]], "blv_ok": True}
             for i, (c, p, b) in enumerate(zip(cvd, close, big))]
     return {"items": [it]}, {"A": {"days": days}}
 
 
 def test_orderflow():
     lat, dy = of_data()
-    assert [r["s"] for r in C.orderflow("A", lat, dy, TD, None)] == ["ok", "ok", "ok", "ok", "ok"]
+    assert [r["s"] for r in C.orderflow("A", lat, dy, TD, None)] == ["ok", "ok", "ok", "ok", "ok", "ok"]
     lat, dy = of_data(delta=-5, cvd=(6, 5, 4, 3, 2, -1), close=(11, 10.9, 10.8, 10.7, 10.6, 10.5), cvw=-0.2,
-                      big=(-1, -1, -1, -1, -1, -1))
-    assert [r["s"] for r in C.orderflow("A", lat, dy, TD, None)] == ["no", "no", "no", "no", "no"]
+                      big=(-1, -1, -1, -1, -1, -1), cost=11.0)
+    assert [r["s"] for r in C.orderflow("A", lat, dy, TD, None)] == ["no", "no", "no", "no", "no", "no"]
     lat, dy = of_data(cvd=(1, 2), close=(10, 10.1))
     assert st(C.orderflow("A", lat, dy, TD, None), "of_cvd") == "na"      # mới 2 phiên
     assert st(C.orderflow("A", lat, dy, TD, None), "whale5") == "na"
@@ -127,6 +128,22 @@ def test_whale5_counts_last_5_sessions():
     assert st(C.orderflow("A", lat, dy, TD, None), "whale5") == "no"
     lat, dy = of_data(cvd=(1, 2, 3, 4), close=(10, 10.1, 10.2, 10.3), big=(1, 1, 1, 1))
     assert st(C.orderflow("A", lat, dy, TD, None), "whale5") == "na"      # mới 4 phiên
+
+
+def test_whale_cost():
+    lat, dy = of_data(cost=10.4)                         # đóng 10,5 > 10,4
+    assert st(C.orderflow("A", lat, dy, TD, None), "whale_cost") == "ok"
+    days = dy["A"]["days"]
+    days[0]["blv"] = [[5.0, 0, 100000]]                  # phiên rẻ nhưng chưa lưu theo mức giá → bỏ qua
+    days[0]["blv_ok"] = False
+    assert st(C.orderflow("A", lat, dy, TD, None), "whale_cost") == "ok"
+    days[0]["blv_ok"] = True                             # tính vào → giá vốn kéo xuống, vẫn đạt
+    for d in days[1:]:
+        d["blv"] = [[10.6, 0, 1000]]
+    days[0]["blv"] = [[10.6, 0, 1000]]
+    assert st(C.orderflow("A", lat, dy, TD, None), "whale_cost") == "no"   # đóng 10,5 < 10,6
+    lat, dy = of_data(cost=None)
+    assert st(C.orderflow("A", lat, dy, TD, None), "whale_cost") == "na"
     lat, dy = of_data(day="2026-09-24")
     assert {r["s"] for r in C.orderflow("A", lat, dy, TD, None)} == {"na"}
 
@@ -139,9 +156,9 @@ def test_score_counts_only_ok_and_no():
                 of_latest=lat, of_daily=dy)
     b = C.score("A", S, TD, {})
     assert b["name"] == "Công ty A" and b["warn"] == 0
-    assert b["total"] == 1 + 1 + 5 + 1 + 5          # A:1 · B: cdl tính, st/ema na (A không có trong trend) · C:5 · D:1 · E:5
+    assert b["total"] == 1 + 1 + 5 + 1 + 6          # A:1 · B: cdl tính, st/ema na (A không có trong trend) · C:5 · D:1 · E:6
     assert b["na"] == 2
-    assert b["pass"] == 10 and C.code(b).count("|") == 4
+    assert b["pass"] == 11 and C.code(b).count("|") == 4
     assert b["chart"] is None                       # không có nến candle-radar → không vẽ
 
 
