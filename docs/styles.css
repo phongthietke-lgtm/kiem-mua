@@ -61,6 +61,8 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .score b{font:600 19px var(--mono);line-height:1.1}
 .score.hi{background:var(--yellow);color:var(--ink)}   /* đạt từ 10 tiêu chí: nền vàng + số điểm xanh (anh chốt 29/09/2026) */
 .score.hi b{color:#1C7A3A;font-weight:700}
+.hero .score.hi{background:var(--night);color:#fff}   /* trang chi tiết giữ ô điểm như cũ (anh chốt 29/09) */
+.hero .score.hi b{color:inherit;font-weight:600}
 .score small{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
 .minis{grid-column:1/-1;display:flex;gap:9px;align-items:flex-end}
 .minis .g{display:flex;gap:3px;align-items:flex-end}
