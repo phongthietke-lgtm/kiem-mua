@@ -5,10 +5,11 @@ Luồng: tải các nguồn (KingStock + tin UBCKNN, 4 app cuối ngày) (job/so
 (job/checks.py) → lọc mã KingStock báo MUA hôm nay → ghi docs/data/latest.json, daily/<ngày>.json, state.json
 → một push tổng kết nếu có mã báo mua.
 
-Chờ nguồn: nếu một trong 4 app cuối ngày (candle, price-path, wyckoff, order-flow) chưa có phiên hôm nay thì
-lần chạy 16:30/17:15 thoát 0 để lần sau thử lại; lần 18:45 chấm luôn, tiêu chí của nguồn cũ thành "thiếu dữ liệu".
-Không nguồn nào có phiên hôm nay = ngày nghỉ → không ghi gì. LUÔN thoát mã 0: mã ≠ 0 làm bước commit bị bỏ qua
-(bẫy price-path 23/09/2026).
+Phiên cần chấm = phiên mới nhất các app cuối ngày đã có (session_date), không theo đồng hồ — GitHub có khi trễ lịch
+qua nửa đêm (28/09/2026). Đã có daily/<phiên>.json thì thoát. Nếu một trong 4 app cuối ngày (candle, price-path,
+wyckoff, order-flow) chưa có phiên đó thì lượt 16:30/17:15 trong chính ngày phiên thoát 0 để lần sau thử lại; từ 18:40
+hoặc sang ngày sau thì chấm luôn, tiêu chí của nguồn cũ thành "thiếu dữ liệu". Lượt 08:15 sáng hôm sau bù khi cả 3
+lượt chiều trễ/hỏng. LUÔN thoát mã 0: mã ≠ 0 làm bước commit bị bỏ qua (bẫy price-path 23/09/2026).
 """
 from __future__ import annotations
 
@@ -59,6 +60,19 @@ def stale_reasons(status: dict, trade_date: str) -> dict[str, str | None]:
     return out
 
 
+def session_date(status: dict) -> str | None:
+    """Phiên cần chấm = phiên mới nhất mà các app cuối ngày đã có — KHÔNG theo đồng hồ. GitHub có khi trễ lịch qua nửa
+    đêm: 28/09/2026 cả 3 lượt chạy lúc 00:45–01:43 ngày 29/09, job cũ tìm "phiên 29/09", không nguồn nào có nên mất trắng
+    phiên 28/09. Lấy theo nguồn thì lượt trễ (kể cả thứ Sáu trễ sang thứ Bảy) vẫn chấm đúng phiên còn thiếu."""
+    ds = [st["date"] for n, st in status.items() if n in EOD and st.get("ok") and st.get("date")]
+    return max(ds) if ds else None
+
+
+def must_wait(now: datetime, trade_date: str, fresh: list) -> bool:
+    """Còn nguồn chưa có phiên này: chỉ chờ lượt sau khi đang trong chính ngày phiên và trước giờ chót."""
+    return len(fresh) < len(EOD) and now.strftime("%Y-%m-%d") == trade_date and now.strftime("%H:%M") < FINAL_HHMM
+
+
 def buy_alerts(signals: list | None, trade_date: str) -> list[dict]:
     """Mã KingStock báo MUA trong ngày, chưa bị huỷ; mỗi mã giữ lần báo sớm nhất."""
     seen, out = set(), []
@@ -93,26 +107,29 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
 
     now = datetime.now(TZ)
-    trade_date = a.date or now.strftime("%Y-%m-%d")
-    if not a.date and now.weekday() >= 5 and not a.force:
-        log.info("Cuối tuần — bỏ qua")
-        return 0
-    day_file = DAILY / f"{trade_date}.json"
-    if day_file.exists() and not a.force:
-        log.info("Đã có %s — bỏ qua (dùng --force để chạy lại)", day_file.name)
+    if a.date and (DAILY / f"{a.date}.json").exists() and not a.force:
+        log.info("Đã có %s.json — bỏ qua (dùng --force để chạy lại)", a.date)
         return 0
 
     S = sources.load(now)
     if S.signals is None and S.status.get("kingstock", {}).get("ok"):
         S.status["kingstock"]["ok"] = False
+    log.info("Nguồn: %s", {k: (v["ok"], v["date"]) for k, v in S.status.items()})
+    trade_date = a.date or session_date(S.status)
+    if not trade_date:
+        log.info("Không nguồn cuối ngày nào đọc được ngày phiên — không ghi gì")
+        return 0
+    day_file = DAILY / f"{trade_date}.json"
+    if day_file.exists() and not a.force:
+        log.info("Phiên %s đã chấm (%s) — bỏ qua (dùng --force để chạy lại)", trade_date, day_file.name)
+        return 0
     stale = stale_reasons(S.status, trade_date)
     fresh = [n for n in EOD if not stale.get(n)]
-    log.info("Nguồn: %s", {k: (v["ok"], v["date"]) for k, v in S.status.items()})
     if not fresh:
-        log.info("Không nguồn cuối ngày nào có phiên %s — ngày nghỉ hoặc nguồn chưa chạy; không ghi gì", trade_date)
+        log.info("Không nguồn cuối ngày nào có phiên %s — không ghi gì", trade_date)
         return 0
-    if len(fresh) < len(EOD) and now.strftime("%H:%M") < FINAL_HHMM and not a.force:
-        log.info("Còn chờ %s — thoát để lần chạy sau thử lại", [n for n in EOD if n not in fresh])
+    if must_wait(now, trade_date, fresh) and not a.force:
+        log.info("Phiên %s: còn chờ %s — thoát để lần chạy sau thử lại", trade_date, [n for n in EOD if n not in fresh])
         return 0
 
     symbols = [w["symbol"] for w in S.watchlist or []] or sorted(((S.pp or {}).get("symbols") or {}).keys())

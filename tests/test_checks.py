@@ -180,3 +180,26 @@ def test_stale_reasons():
     s = stale_reasons({"kingstock": {"ok": True, "date": "x"}, "ssc": {"ok": False, "error": "Fly chết"}, "x": {"ok": True, "date": "2026-09-20"},
                        "candle": {"ok": True, "date": "2026-09-24"}, "wyckoff": {"ok": True, "date": TD}}, TD)
     assert "kingstock" not in s and "Fly chết" in s["ssc"] and "20/09" in s["x"] and "24/09" in s["candle"] and s["wyckoff"] is None
+
+
+def test_session_date_from_sources_not_clock():
+    from job.run_daily import session_date
+    st = {"kingstock": {"ok": True, "date": "2026-09-30"}, "ssc": {"ok": True, "date": "2026-09-30"},
+          "candle": {"ok": True, "date": "2026-09-28"}, "pricepath": {"ok": True, "date": "2026-09-28"},
+          "wyckoff": {"ok": False, "date": None}, "orderflow": {"ok": True, "date": "2026-09-28"}}
+    # lượt trễ qua nửa đêm: đồng hồ đã sang ngày khác nhưng vẫn chấm phiên các nguồn đang có
+    assert session_date(st) == "2026-09-28"
+    st["orderflow"]["date"] = "2026-09-29"
+    assert session_date(st) == "2026-09-29"
+    assert session_date({"candle": {"ok": False, "date": None}}) is None
+
+
+def test_must_wait_only_same_day_before_deadline():
+    from datetime import datetime
+    from common.config import TZ
+    from job.run_daily import must_wait
+    fresh3 = ["candle", "pricepath", "orderflow"]
+    assert must_wait(datetime(2026, 9, 29, 16, 30, tzinfo=TZ), "2026-09-29", fresh3)
+    assert not must_wait(datetime(2026, 9, 29, 18, 45, tzinfo=TZ), "2026-09-29", fresh3)
+    assert not must_wait(datetime(2026, 9, 30, 0, 45, tzinfo=TZ), "2026-09-29", fresh3)   # GitHub trễ sang hôm sau
+    assert not must_wait(datetime(2026, 9, 29, 16, 30, tzinfo=TZ), "2026-09-29", fresh3 + ["wyckoff"])

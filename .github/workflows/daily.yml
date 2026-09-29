@@ -1,6 +1,8 @@
 # Job sau phiên. 09:30 UTC = 16:30 VN — sau order-flow (16:00), price-path zone (15:50), wyckoff (15:45),
-# candle-radar (15:35). Dự phòng 17:15 và 18:45 VN: nguồn nào chưa có phiên hôm nay thì lần 16:30/17:15 thoát
-# để chờ; lần 18:45 chấm luôn (nguồn cũ = "thiếu dữ liệu"). Job idempotent: có daily/<hôm nay>.json rồi thì thoát.
+# candle-radar (15:35). Dự phòng 17:15 và 18:45 VN: nguồn nào chưa có phiên thì lần 16:30/17:15 thoát
+# để chờ; lần 18:45 chấm luôn (nguồn cũ = "thiếu dữ liệu"). Thêm 08:15 VN sáng T3–T7 (01:15 UTC) để bù khi GitHub trễ
+# lịch (28/09/2026: 3 lượt chiều chạy lúc 00:45–01:43 hôm sau). Ngày phiên lấy từ nguồn, không theo giờ chạy.
+# Job idempotent: có daily/<phiên>.json rồi thì thoát.
 # Job luôn thoát mã 0 — mã ≠ 0 làm bước commit bị bỏ qua (bẫy price-path 23/09/2026).
 name: daily
 
@@ -9,6 +11,7 @@ on:
     - cron: "30 9 * * 1-5"
     - cron: "15 10 * * 1-5"
     - cron: "45 11 * * 1-5"
+    - cron: "15 1 * * 2-6"
   workflow_dispatch:
     inputs:
       force:
