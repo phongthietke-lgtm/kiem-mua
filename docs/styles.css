@@ -59,7 +59,8 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .up{color:var(--up)} .down{color:var(--down)} .ref{color:var(--ref)}
 .score{background:var(--night);color:#fff;border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:64px;align-self:start}
 .score b{font:600 19px var(--mono);line-height:1.1}
-.score.hi{background:var(--yellow);color:var(--ink)}   /* đạt từ 10 tiêu chí: vàng cho dễ thấy (29/09/2026) */
+.score.hi{background:var(--yellow);color:var(--ink)}   /* đạt từ 10 tiêu chí: nền vàng + số điểm xanh (anh chốt 29/09/2026) */
+.score.hi b{color:#1C7A3A;font-weight:700}
 .score small{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
 .minis{grid-column:1/-1;display:flex;gap:9px;align-items:flex-end}
 .minis .g{display:flex;gap:3px;align-items:flex-end}
@@ -78,6 +79,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .grid39 button{border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--purple);font-weight:800;font-size:14px}
 .grid39 button small{font:500 11px var(--mono);color:var(--mute)}
 .grid39 button.hi{background:var(--yellow);border-color:#C9971A;color:var(--ink);font-weight:800}
+.grid39 button.hi small{color:#1C7A3A;font-weight:800}
 
 /* lịch sử & cài đặt */
 .hrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}

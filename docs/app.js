@@ -10,7 +10,7 @@
   const SRC = [["kingstock", "KingStock"], ["ssc", "UBCKNN"], ["candle", "Candle"], ["pricepath", "Price Path"], ["wyckoff", "Wyckoff"], ["orderflow", "Order Flow"]];
   const GLYPH = { ok: "✓", no: "✕", warn: "!", na: "–", info: "i" };
   const EVN = { sc: "SC", spring3: "Spring #3", test: "Test" };
-  const HI = 10;  // tô vàng (lưới Tra mã, ô điểm) khi đạt từ ngần này tiêu chí — anh chốt 29/09/2026; báo điện thoại từ 15 (job PUSH_MIN)
+  const HI = 10;  // nền vàng + số điểm xanh (lưới Tra mã, ô điểm) khi đạt từ ngần này tiêu chí — anh chốt 29/09/2026; báo điện thoại từ 15 (job PUSH_MIN)
 
   const $ = (s) => document.querySelector(s);
   const vn = (x, d = 2) => (x == null ? "–" : x.toLocaleString("vi-VN", { minimumFractionDigits: d, maximumFractionDigits: d }));
@@ -64,7 +64,7 @@
 
   function renderLookup() {
     const syms = Object.keys(D.board).sort();
-    $("#gridNote").textContent = `Vàng = đạt từ ${HI} tiêu chí`;
+    $("#gridNote").textContent = `Nền vàng, số xanh = đạt từ ${HI} tiêu chí`;
     $("#grid39").innerHTML = syms.map((s) => {
       const b = D.board[s];
       return `<button type="button" data-sym="${esc(s)}" class="${b.pass >= HI ? "hi" : ""}">${esc(s)}<small>${b.pass}/${b.total}</small></button>`;
