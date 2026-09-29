@@ -31,6 +31,7 @@ LATEST, STATE, DAILY = SITE_DATA / "latest.json", SITE_DATA / "state.json", SITE
 EOD = ("candle", "pricepath", "wyckoff", "orderflow")
 FINAL_HHMM = "18:40"            # từ giờ này, nguồn nào chưa có hôm nay thì chấm luôn với "thiếu dữ liệu"
 HISTORY_DAYS = 30
+PUSH_MIN = 15                   # báo điện thoại khi một mã đạt từ ngần này tiêu chí (app tô xanh từ 10, docs/app.js HI)
 
 
 def _load(path, default):
@@ -71,6 +72,12 @@ def session_date(status: dict) -> str | None:
 def must_wait(now: datetime, trade_date: str, fresh: list) -> bool:
     """Còn nguồn chưa có phiên này: chỉ chờ lượt sau khi đang trong chính ngày phiên và trước giờ chót."""
     return len(fresh) < len(EOD) and now.strftime("%Y-%m-%d") == trade_date and now.strftime("%H:%M") < FINAL_HHMM
+
+
+def strong(board: dict) -> list[str]:
+    """Mã (trong cả danh mục, không chỉ mã KingStock báo MUA) đạt từ PUSH_MIN tiêu chí — điểm cao trước.
+    Anh chốt 29/09/2026: đạt ≥ 15 tiêu chí mới báo điện thoại (trước đó: báo mỗi khi KingStock có mã MUA)."""
+    return sorted((s for s, b in board.items() if b["pass"] >= PUSH_MIN), key=lambda s: (-board[s]["pass"], s))
 
 
 def buy_alerts(signals: list | None, trade_date: str) -> list[dict]:
@@ -145,10 +152,12 @@ def main(argv=None) -> int:
              "scores": {s: {"pass": b["pass"], "total": b["total"], "warn": b["warn"], "code": checks.code(b)}
                         for s, b in board.items()}}
 
-    pushed = {"skipped": "không có mã báo MUA"} if not alerts else {"skipped": "--no-push"}
-    if alerts and not (a.no_push or a.dry_run):
+    hot = strong(board)
+    log.info("Mã đạt từ %d tiêu chí: %s", PUSH_MIN, [(s, board[s]["pass"]) for s in hot])
+    pushed = {"skipped": f"không mã nào đạt từ {PUSH_MIN} tiêu chí"} if not hot else {"skipped": "--no-push"}
+    if hot and not (a.no_push or a.dry_run):
         subs = push.subscriptions()
-        pushed = push.send(push.summary_payload(alerts, board, trade_date), subs) | {"devices": len(subs)}
+        pushed = push.send(push.strong_payload(hot, board, alerts, trade_date, PUSH_MIN), subs) | {"devices": len(subs)}
         log.info("Push: %s", pushed)
 
     if a.dry_run:

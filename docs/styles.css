@@ -59,6 +59,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .up{color:var(--up)} .down{color:var(--down)} .ref{color:var(--ref)}
 .score{background:var(--night);color:#fff;border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:64px;align-self:start}
 .score b{font:600 19px var(--mono);line-height:1.1}
+.score.hi{background:#2F9D4E}
 .score small{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
 .minis{grid-column:1/-1;display:flex;gap:9px;align-items:flex-end}
 .minis .g{display:flex;gap:3px;align-items:flex-end}

@@ -10,7 +10,7 @@
   const SRC = [["kingstock", "KingStock"], ["ssc", "UBCKNN"], ["candle", "Candle"], ["pricepath", "Price Path"], ["wyckoff", "Wyckoff"], ["orderflow", "Order Flow"]];
   const GLYPH = { ok: "✓", no: "✕", warn: "!", na: "–", info: "i" };
   const EVN = { sc: "SC", spring3: "Spring #3", test: "Test" };
-  const HI = 8;   // lưới Tra mã tô xanh khi đạt từ ngần này tiêu chí
+  const HI = 10;  // tô xanh (lưới Tra mã, ô điểm) khi đạt từ ngần này tiêu chí — anh chốt 29/09/2026; báo điện thoại từ 15 (job PUSH_MIN)
 
   const $ = (s) => document.querySelector(s);
   const vn = (x, d = 2) => (x == null ? "–" : x.toLocaleString("vi-VN", { minimumFractionDigits: d, maximumFractionDigits: d }));
@@ -30,7 +30,7 @@
     return `<svg width="10" height="28" viewBox="0 0 10 28"><line x1="5" y1="${y - 3}" x2="5" y2="${y + h + 2}" stroke="${c[1]}" stroke-width="1.4"/><rect x="1.2" y="${y}" width="7.6" height="${h}" rx="1" fill="${c[0]}" stroke="${c[1]}" stroke-width="1.4" ${s === "na" ? 'stroke-dasharray="2 2"' : ""}/></svg>`;
   }
   const minis = (b) => `<div class="minis" aria-hidden="true">${Object.values(b.groups).map((v) => `<span class="g">${v.filter((x) => x.s !== "info").map((x) => mini(x.s)).join("")}</span>`).join("")}</div>`;
-  const scoreBox = (b, lab = "đạt") => `<div class="score"><b>${b.pass}/${b.total}</b><small>${lab}</small></div>`;
+  const scoreBox = (b, lab = "đạt") => `<div class="score${b.pass >= HI ? " hi" : ""}"><b>${b.pass}/${b.total}</b><small>${lab}</small></div>`;
   const bos = (label, right) => `<div class="bos"><div class="ln"></div><div class="lab"><b>${label}</b><span>${right}</span></div></div>`;
 
   function card(sym, a) {

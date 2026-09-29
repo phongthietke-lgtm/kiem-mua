@@ -62,20 +62,18 @@ def send(payload: dict, subs: list[dict]) -> dict:
     return res
 
 
-def summary_payload(alerts: list[dict], board: dict, trade_date: str) -> dict:
-    """Vd: title 'Kiểm Mua · 3 mã báo MUA · 25/09', body 'TPB 6/12 · VDS 0/12 (1 cảnh báo) · …' — điểm cao trước."""
-    rows = sorted(alerts, key=lambda a: -(board[a["sym"]]["pass"] / max(board[a["sym"]]["total"], 1)))
-    bits = []
-    for a in rows:
-        b = board[a["sym"]]
-        bits.append(f"{a['sym']} {b['pass']}/{b['total']}" + (f" ({b['warn']} cảnh báo)" if b["warn"] else ""))
-    return {"kind": "summary", "title": f"Kiểm Mua · {len(alerts)} mã báo MUA · {trade_date[8:10]}/{trade_date[5:7]}",
+def strong_payload(hot: list[str], board: dict, alerts: list[dict], trade_date: str, need: int) -> dict:
+    """Vd: title 'Kiểm Mua · 1 mã đạt ≥ 15 tiêu chí · 25/09', body 'VPB 15/17 · TCB 16/17 (▲ KS báo MUA)'."""
+    ks = {a["sym"] for a in alerts}
+    bits = [f"{s} {board[s]['pass']}/{board[s]['total']}" + (" (▲ KS báo MUA)" if s in ks else "")
+            + (f" ({board[s]['warn']} cảnh báo)" if board[s]["warn"] else "") for s in hot]
+    return {"kind": "summary", "title": f"Kiểm Mua · {len(hot)} mã đạt ≥ {need} tiêu chí · {trade_date[8:10]}/{trade_date[5:7]}",
             "body": " · ".join(bits), "url": "./", "tag": f"km-{trade_date}", "hot": True}
 
 
 def test_payload() -> dict:
     return {"kind": "test", "title": "Kiểm Mua — máy này đã nhận được",
-            "body": "Sau 16:30, khi KingStock có mã báo MUA, bảng soát 14 tiêu chí sẽ tới như thế này.",
+            "body": "Sau 16:30, khi có mã đạt từ 15 tiêu chí, thông báo sẽ tới như thế này.",
             "url": "./", "tag": "km-test"}
 
 

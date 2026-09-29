@@ -203,3 +203,16 @@ def test_must_wait_only_same_day_before_deadline():
     assert not must_wait(datetime(2026, 9, 29, 18, 45, tzinfo=TZ), "2026-09-29", fresh3)
     assert not must_wait(datetime(2026, 9, 30, 0, 45, tzinfo=TZ), "2026-09-29", fresh3)   # GitHub trễ sang hôm sau
     assert not must_wait(datetime(2026, 9, 29, 16, 30, tzinfo=TZ), "2026-09-29", fresh3 + ["wyckoff"])
+
+
+def test_strong_push_threshold_15():
+    from job.push import strong_payload
+    from job.run_daily import PUSH_MIN, strong
+    board = {"VPB": {"pass": 15, "total": 17, "warn": 0}, "TCB": {"pass": 16, "total": 17, "warn": 1},
+             "FPT": {"pass": 14, "total": 17, "warn": 0}, "HPG": {"pass": 10, "total": 17, "warn": 0}}
+    assert PUSH_MIN == 15
+    assert strong(board) == ["TCB", "VPB"]              # 14 và 10 không báo; điểm cao trước
+    p = strong_payload(strong(board), board, [{"sym": "VPB"}], "2026-09-29", PUSH_MIN)
+    assert p["title"] == "Kiểm Mua · 2 mã đạt ≥ 15 tiêu chí · 29/09"
+    assert p["body"] == "TCB 16/17 (1 cảnh báo) · VPB 15/17 (▲ KS báo MUA)"
+    assert strong({"FPT": {"pass": 14, "total": 17, "warn": 0}}) == []
