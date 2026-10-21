@@ -1,12 +1,8 @@
 {
- "last_run": "2026-10-20T21:25:19+07:00",
- "trade_date": "2026-10-20",
+ "last_run": "2026-10-21T21:34:46+07:00",
+ "trade_date": "2026-10-21",
  "push": {
-  "sent": 1,
-  "gone": 0,
-  "failed": 0,
-  "errors": [],
-  "devices": 1
+  "skipped": "không mã nào đạt từ 15 tiêu chí"
  },
  "vapid": true,
  "devices": 1
